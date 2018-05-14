@@ -1,1 +1,0 @@
-3c787c5bfb6ef3b8700b1d97daa2e91951640456e8f949e3bba290ce34a0397d  cloudSQLMigrator_0.1.06_linux_amd64.tar.gz
