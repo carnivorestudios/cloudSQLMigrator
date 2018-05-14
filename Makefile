@@ -1,0 +1,5 @@
+
+release:
+	goreleaser
+
+.PHONY: release
