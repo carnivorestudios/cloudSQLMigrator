@@ -1,5 +1,5 @@
 
 release:
-	goreleaser
+	goreleaser --rm-dist
 
 .PHONY: release
