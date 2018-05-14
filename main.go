@@ -68,6 +68,7 @@ func main() {
 
 	// Step 3: Load up the proxy with the instance and credentials
 	instanceArg := fmt.Sprintf("-instances=%s=tcp:%d", instanceID, SQLCloudProxyPort)
+	fmt.Println("Instance args: ", instanceArg)
 	args := []string{instanceArg}
 
 	// Build out the cmd
@@ -75,8 +76,6 @@ func main() {
 	proxyCMD = exec.Command(path, args...)
 	proxyCMD.Stderr = os.Stderr
 	proxyCMD.Stderr = outBuff
-	// outPipe, err := proxyCMD.StdoutPipe()
-	pError(err)
 
 	// Add ENVs
 	osENVs := os.Environ()
@@ -90,7 +89,7 @@ func main() {
 
 	// Start the process
 	if err := proxyCMD.Start(); err != nil {
-		fmt.Println("Err1: ", err)
+		fmt.Println("Child process exited with error: ", err)
 		pError(err)
 	}
 
@@ -120,6 +119,7 @@ func main() {
 		}
 
 		if len(bytez) > 0 {
+			fmt.Println("SQL Logs: ", string(bytez))
 			if strings.Contains(string(bytez), "Ready for new connections") {
 				*proxyIsUp = true
 				break
@@ -136,6 +136,7 @@ func main() {
 
 	// Proxy is setup, let's attempt the migrations
 	pgURL := fmt.Sprintf("postgres://%s:%s@localhost:%d/%s?sslmode=disable", dbUser, dbPass, SQLCloudProxyPort, dbName)
+	fmt.Println("Attempting to open sql connection with url: ", pgURL)
 	db, err := sql.Open("postgres", pgURL)
 	pError(err)
 
@@ -143,6 +144,8 @@ func main() {
 	migrations := &migrate.FileMigrationSource{
 		Dir: MigrationsFolder,
 	}
+
+	fmt.Println("About to execute migrations: ")
 	n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
 	pError(err)
 	fmt.Printf("Applied %d migrations!\n", n)
